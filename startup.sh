@@ -8,8 +8,8 @@ cd ~/.ssh
 # Add ssh keys
 echo "Adding ssh keys . . ."
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ8X7q6i6F5BAqOS6SavxF3L6+lvGsC6NV8h66Ebc+ay CannonGWilson@gmail.com" > id_ed25519.pub
-echo "Please enter the private key: "
-read key_input
+echo "Please enter the private key (end with blank line and hit enter): "
+key_input = $(sed '/^$/q')
 echo $key_input > id_ed25519 
 chmod 600 id_ed25519
 cd ~
