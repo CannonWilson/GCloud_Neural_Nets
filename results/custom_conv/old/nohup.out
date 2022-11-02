@@ -1,0 +1,38 @@
+Use GPU: 0
+Using custom convolutions in the network
+Training time data augmentations:
+Scale [Shortest side 144]
+Random Horizontal Flip
+Random Color [Range 0.85 - 1.15]
+Random Rotation [Range -15.00 - 15.00 Degree]
+Random Crop[Size (128, 128); Area 0.25 - 1.00; Ratio 0.80 - 1.20]
+To Tensor()
+Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+Training the model ...
+/opt/conda/lib/python3.7/site-packages/torch/utils/data/dataloader.py:566: UserWarning: This DataLoader will create 4 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  cpuset_checked))
+Traceback (most recent call last):
+  File "./main.py", line 520, in <module>
+    main(args)
+  File "./main.py", line 298, in main
+    train(train_loader, model, criterion, optimizer, scheduler, epoch, args)
+  File "./main.py", line 347, in train
+    for i, (input, target) in enumerate(train_loader):
+  File "/opt/conda/lib/python3.7/site-packages/torch/utils/data/dataloader.py", line 444, in __iter__
+    return self._get_iterator()
+  File "/opt/conda/lib/python3.7/site-packages/torch/utils/data/dataloader.py", line 390, in _get_iterator
+    return _MultiProcessingDataLoaderIter(self)
+  File "/opt/conda/lib/python3.7/site-packages/torch/utils/data/dataloader.py", line 1077, in __init__
+    w.start()
+  File "/opt/conda/lib/python3.7/multiprocessing/process.py", line 112, in start
+    self._popen = self._Popen(self)
+  File "/opt/conda/lib/python3.7/multiprocessing/context.py", line 223, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/opt/conda/lib/python3.7/multiprocessing/context.py", line 277, in _Popen
+    return Popen(process_obj)
+  File "/opt/conda/lib/python3.7/multiprocessing/popen_fork.py", line 20, in __init__
+    self._launch(process_obj)
+  File "/opt/conda/lib/python3.7/multiprocessing/popen_fork.py", line 70, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
