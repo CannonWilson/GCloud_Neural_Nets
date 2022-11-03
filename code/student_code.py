@@ -396,10 +396,10 @@ class SimpleViT(nn.Module):
         ### Start my code ###
 
         x = self.patch_embed(x)
-        x = rearrange(x, 'b ... d -> b (...) d') + self.pos_embed
+        x += self.pos_embed
 
         for _ in range(self.transformer_depth):
-            x = self.trasnformer(x)
+            x = self.transformer(x)
         
         x = x.mean(dim = 1)
         x = self.head(x)
