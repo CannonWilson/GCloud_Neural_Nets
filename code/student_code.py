@@ -9,6 +9,9 @@ from torch.nn.functional import fold, unfold
 from torchvision.utils import make_grid
 import math
 
+from einops import rearrange
+from einops.layers.torch import Rearrange
+
 from utils import resize_image
 import custom_transforms as transforms
 from custom_blocks import PatchEmbed, TransformerBlock, trunc_normal_
@@ -354,12 +357,13 @@ class SimpleViT(nn.Module):
         stride = (2, 2) # From page 15, A.2 Implementation details
         padding = (1, 1)
 
-        self.features = nn.Sequential(
-            PatchEmbed(patch_size, stride, padding, in_chans, embed_dim)
+        self.patch_embed = PatchEmbed(patch_size, stride, padding, in_chans, embed_dim)
+        self.transformer = TransformerBlock(embed_dim, num_heads, mlp_ratio, qkv_bias, drop_path_rate, norm_layer, act_layer, window_size)
+        self.transformer_depth = depth
+        self.head = nn.Sequential(
+            nn.LayerNorm(embed_dim),
+            nn.Linear(embed_dim, num_classes)
         )
-        for _ in range(depth):
-            self.features.append(TransformerBlock(embed_dim, num_heads, mlp_ratio, qkv_bias, drop_path_rate, norm_layer, act_layer, window_size))
-        self.fc = nn.Linear(512, num_classes)
         
 
         ### End my code ###
@@ -372,6 +376,11 @@ class SimpleViT(nn.Module):
 
         self.apply(self._init_weights)
         # add any necessary weight initialization here
+
+    ### Start my code ###
+
+
+    ### End my code ###
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
@@ -386,8 +395,14 @@ class SimpleViT(nn.Module):
         ########################################################################
         ### Start my code ###
 
-        x = self.features(x)
-        x = self.fc(x)
+        x = self.patch_embed(x)
+        x = rearrange(x, 'b ... d -> b (...) d') + self.pos_embed
+
+        for _ in range(self.transformer_depth):
+            x = self.trasnformer(x)
+        
+        x = x.mean(dim = 1)
+        x = self.head(x)
 
         ### End my code ###
         ########################################################################
