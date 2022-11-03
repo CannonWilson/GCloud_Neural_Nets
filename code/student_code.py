@@ -394,9 +394,12 @@ class SimpleViT(nn.Module):
     def forward(self, x):
         ########################################################################
         ### Start my code ###
-
+        print(f'X starting shape: {x.shape}')
         x = self.patch_embed(x)
+        print(f'x shape after patch embed: {x.shape}')
         x += self.pos_embed
+        print(f'x shape after pos embed: {x.shape}')
+
 
         for _ in range(self.transformer_depth):
             x = self.transformer(x)
