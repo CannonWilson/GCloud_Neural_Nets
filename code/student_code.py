@@ -391,19 +391,16 @@ class SimpleViT(nn.Module):
     def forward(self, x):
         ########################################################################
         ### Start my code ###
-        print(f'X starting shape: {x.shape}') # torch.Size([128, 3, 128, 128])
-        x = self.patch_embed(x)
-        print(f'x shape after patch embed: {x.shape}') # torch.Size([128, 58, 58, 192])
+        # x starting shape: torch.Size([128, 3, 128, 128])
+        x = self.patch_embed(x)# torch.Size([128, 58, 58, 192])
         pos = self.pos_embed # torch.Size([1, 8, 8, 192])
-
 
         for _ in range(self.transformer_depth):
             x = self.transformer(x)
         
-        print(f'shape of X after transformer layers: {x.shape}')
         x = x.mean(dim = 1)
-        
         x = self.head(x)
+        x = x.mean(dim = 1)
 
         ### End my code ###
         ########################################################################
