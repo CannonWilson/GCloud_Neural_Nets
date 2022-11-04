@@ -495,14 +495,26 @@ class PGDAttack(object):
         # Loop over the num_steps
         for _ in range(self.num_steps):
 
+            # Make prediction on input
             prediction = model(input)
-            print(f'prediction: {prediction}')
-            print(f'prediction size: {prediction.size}')
+            # Get least confident labels (indices)
+            least_conf_vals, least_conf_indices = prediction.min(dim=1)
+            # Calculate loss
+            loss_fn = self.loss_fn
+            loss = loss_fn(prediction, least_conf_indices)
+            # Perform BPROP with loss to generate output gradient
+            loss.backward()
+            output_grad = output.grad #https://pytorch.org/docs/stable/generated/torch.Tensor.grad.html
+            # Calculate sign of gradient
+            sign = torch.sign(output_grad)
+            # Clip output in range += epsilon, update if within range
+            if output - self.epsilon <= output + self.step_size*sign*output_grad <= output + self.epsilon:
+                output += sign * output_grad * self.step_size
+            else:
+                break
+            # Reset output gradient to zero to prevent gradient buildup
+            output.grad.zero_()
 
-            # Create adversarial pattern
-            loss = nn.CrossEntropyLoss()
-
-            
         ### End my code ###
         #################################################################################
 
