@@ -486,7 +486,7 @@ class PGDAttack(object):
         """
         # clone the input tensor and disable the gradients
         output = input.clone()
-        output.requires_grad = True # output.grad is None without these lines
+        output.requires_grad = True # output.grad is None without this line
         input.requires_grad = False
 
         #################################################################################
@@ -494,19 +494,21 @@ class PGDAttack(object):
         
         # Loop over the num_steps
         for _ in range(self.num_steps):
-            output.retain_grad()
+            output.retain_grad() # retain output gradient during BPROP
+            # Make prediction and get least confident prediction
             prediction = model.forward(output)
             least_conf_vals, least_conf_indices = prediction.min(dim=1)
-            # Create adversarial pattern
+            # Calculate loss and perform BPROP
             loss_fn = self.loss_fn
             loss = loss_fn(prediction, least_conf_indices)
             loss.backward(retain_graph=True)
+            # Update output using PGD
             output_grad = output.grad.data #https://pytorch.org/docs/stable/generated/torch.Tensor.grad.html
             sign = torch.sign(output_grad)
             output.data = output.data + self.step_size * sign
+            # Clip output within epsilon bounds
             output.data = torch.clamp(output.data, input - self.epsilon, input + self.epsilon)
-            
-        ### End my code ###
+        
         #################################################################################
 
         return output
