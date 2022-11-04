@@ -91,9 +91,18 @@ class CustomConv2DFunction(Function):
                 for col_idx in range(output_width):
                     start_col = col_idx * stride
 
-                    output[:, c_out_idx, row_idx, col_idx] = \
-                        (padded_input[:,:,start_row:start_row+kernel_size,start_col:start_col+kernel_size] \
-                        * weight[c_out_idx,:,0:kernel_size,0:kernel_size]).sum(axis=(1,2,3))
+                    # Need to loop over num_channels_in and kernel_size x kernel_size to find sum for each input map
+                    sum_list = torch.zeros(num_maps, dtype=input_feats.dtype)
+                    for n_idx in range(num_maps):
+                        sum = 0.0
+                        for c_in_idx in range(num_channels_in):
+                            for k_row_idx in range(kernel_size):
+                                for k_col_idx in range(kernel_size):
+                                    cur_input = padded_input[n_idx,c_in_idx,start_row+k_row_idx,start_col+k_col_idx]
+                                    cur_weight = weight[c_out_idx,c_in_idx,k_row_idx,k_col_idx]
+                                    sum += cur_input * cur_weight
+                        sum_list[n_idx] = sum if bias is None else sum + bias[c_out_idx]
+                    output[:, c_out_idx, row_idx, col_idx] = sum_list
                     
 
         # Save variables for BPROP
@@ -483,13 +492,17 @@ class PGDAttack(object):
         #################################################################################
         ### Start my code ###
 
-        loss = nn.CrossEntropyLoss()
-        prediction = model(input)
-        print(f'prediction: {prediction}')
-
-        # loop over the number of steps
+        # Loop over the num_steps
         for _ in range(self.num_steps):
-            pass
+
+            prediction = model(input)
+            print(f'prediction: {prediction}')
+            print(f'prediction size: {prediction.size}')
+
+            # Create adversarial pattern
+            loss = nn.CrossEntropyLoss()
+
+            
         ### End my code ###
         #################################################################################
 
