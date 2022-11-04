@@ -64,6 +64,11 @@ class CustomConv2DFunction(Function):
         #################################################################################
         ### Start my code ###
 
+        # Set device to cuda if available
+        if not torch.cuda.is_available():
+            raise Exception("Cuda is not available")
+        cuda0 = torch.device('cuda:0')
+
         # Save dimensions for later calculations
         num_channels_out = weight.size(0)
         num_maps, num_channels_in, input_height, input_width = input_feats.shape
@@ -71,13 +76,13 @@ class CustomConv2DFunction(Function):
     
         # Pad the input
         padded_input_shape = (num_maps, num_channels_in, input_height + 2*padding, input_width + 2*padding)
-        padded_input = torch.zeros(padded_input_shape, dtype=input_feats.dtype)
+        padded_input = torch.zeros(padded_input_shape, dtype=input_feats.dtype, device=cuda0)
         padded_input[:, :, padding:input_height+padding, padding:input_width+padding] = input_feats
 
         # Create empty output tensor with correct shape
         output_height = (input_height + 2 * padding - kernel_size) // stride + 1
         output_width = (input_width + 2 * padding - kernel_size) // stride + 1
-        output = torch.zeros(num_maps, num_channels_out, output_height, output_width, dtype=input_feats.dtype)
+        output = torch.zeros(num_maps, num_channels_out, output_height, output_width, dtype=input_feats.dtype, device=cuda0)
 
         # Perform convolution
         for c_out_idx in range(num_channels_out):
@@ -118,6 +123,12 @@ class CustomConv2DFunction(Function):
         #################################################################################
         ### Start my code ###
 
+        # Set device to cuda if available
+        if not torch.cuda.is_available():
+            raise Exception("Cuda is not available")
+        cuda0 = torch.device('cuda:0')
+
+        # Helpful dimension variables
         padding = ctx.padding
         stride = ctx.stride
         padded_input, weight, bias = ctx.saved_tensors
@@ -126,8 +137,8 @@ class CustomConv2DFunction(Function):
         num_channels_out, num_channels_in, kernel_size, kernel_size = weight.shape
         num_maps, num_channels_out, output_height, output_width = grad_output.shape
 
-        padded_grad = torch.zeros(padded_input.shape, dtype=padded_input.dtype)
-        grad_weight = torch.zeros(weight.shape, dtype=weight.dtype)
+        padded_grad = torch.zeros(padded_input.shape, dtype=padded_input.dtype, device=cuda0)
+        grad_weight = torch.zeros(weight.shape, dtype=weight.dtype, device=cuda0)
         for c_out_idx in range(num_channels_out):
             for row_idx in range(output_height):
                 start_row = row_idx * stride
