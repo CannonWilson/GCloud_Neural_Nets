@@ -86,18 +86,9 @@ class CustomConv2DFunction(Function):
                 for col_idx in range(output_width):
                     start_col = col_idx * stride
 
-                    # Need to loop over num_channels_in and kernel_size x kernel_size to find sum for each input map
-                    sum_list = torch.zeros(num_maps, dtype=input_feats.dtype)
-                    for n_idx in range(num_maps):
-                        sum = 0.0
-                        for c_in_idx in range(num_channels_in):
-                            for k_row_idx in range(kernel_size):
-                                for k_col_idx in range(kernel_size):
-                                    cur_input = padded_input[n_idx,c_in_idx,start_row+k_row_idx,start_col+k_col_idx]
-                                    cur_weight = weight[c_out_idx,c_in_idx,k_row_idx,k_col_idx]
-                                    sum += cur_input * cur_weight
-                        sum_list[n_idx] = sum if bias is None else sum + bias[c_out_idx]
-                    output[:, c_out_idx, row_idx, col_idx] = sum_list
+                    output[:, c_out_idx, row_idx, col_idx] = \
+                        (padded_input[:,:,start_row:start_row+kernel_size,start_col:start_col+kernel_size] \
+                        * weight[c_out_idx,:,0:kernel_size,0:kernel_size]).sum(axis=(1,2,3))
                     
 
         # Save variables for BPROP
@@ -377,11 +368,6 @@ class SimpleViT(nn.Module):
         self.apply(self._init_weights)
         # add any necessary weight initialization here
 
-    ### Start my code ###
-
-
-    ### End my code ###
-
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=0.02)
@@ -394,22 +380,26 @@ class SimpleViT(nn.Module):
     def forward(self, x):
         ########################################################################
         ### Start my code ###
-        print(f'X starting shape: {x.shape}')
+        print(f'X starting shape: {x.shape}') # torch.Size([128, 3, 128, 128])
         x = self.patch_embed(x)
-        print(f'x shape after patch embed: {x.shape}')
-        x += self.pos_embed
-        print(f'x shape after pos embed: {x.shape}')
+        print(f'x shape after patch embed: {x.shape}') # torch.Size([128, 58, 58, 192])
+        pos = self.pos_embed # torch.Size([1, 8, 8, 192])
 
 
         for _ in range(self.transformer_depth):
             x = self.transformer(x)
         
+        print(f'shape of X after transformer layers: {x.shape}')
         x = x.mean(dim = 1)
+        
         x = self.head(x)
 
         ### End my code ###
         ########################################################################
         return x
+
+        # TODO: more efficient convolution forward implementation (maybe put on GPU?)
+        # Reset vm and run nohup python ./main.py ../data --workers=1 --batch-size=64 --epochs=120 --wd 0.05 --lr 0.01 --use-vit &
 
 
 # change this to your model!
