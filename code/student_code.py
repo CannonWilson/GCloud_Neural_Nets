@@ -253,43 +253,43 @@ class SimpleNet(nn.Module):
         self.features = nn.Sequential(
             # conv1 block: conv 7x7
             conv_op(3, 64, kernel_size=7, stride=2, padding=3),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
 
             # ADDED additional block:
             conv_op(64, 64, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(64, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(64, 64, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
 
             # conv2 block: simple bottleneck
             conv_op(64, 64, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(64, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(64, 256, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(256), # ADDED batch norm
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
 
             # conv3 block: simple bottleneck
             conv_op(256, 128, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(128), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(128), # ADDED batch norm
             nn.ReLU(inplace=True),
             conv_op(128, 512, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(self.out_channels, self.eps), # ADDED batch norm
+            nn.BatchNorm2d(512), # ADDED batch norm
             nn.ReLU(inplace=True),
         )
         # global avg pooling + FC
