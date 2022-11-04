@@ -548,7 +548,25 @@ class GradAttention(object):
             input.grad.zero_()
 
         #################################################################################
-        # Fill in the code here
+        ### My Code Start ###
+
+        # (1) computing the input gradient by minimizing the loss of the predicted label
+        # (most confident prediction);
+        input.retain_grad() # retain output gradient during BPROP
+
+        # Make prediction and get most confident prediction
+        prediction = model.forward(input)
+        most_conf_vals, most_conf_indices = prediction.max(dim=1)
+        # Calculate loss and perform BPROP
+        loss_fn = self.loss_fn
+        loss = loss_fn(prediction, most_conf_indices)
+        loss.backward(retain_graph=True)
+        # (2) taking the absolute values of the gradients;
+        input_grad_abs = torch.abs(input.grad) # https://pytorch.org/docs/stable/generated/torch.abs.html
+        # (3) pick the maximum values across three color channels
+        output, output_indices = input_grad_abs.max(dim=1, keepdim=True)
+
+        ### My Code End ###
         #################################################################################
 
         return output
