@@ -505,7 +505,7 @@ class PGDAttack(object):
             # Update output using PGD
             output_grad = output.grad.data #https://pytorch.org/docs/stable/generated/torch.Tensor.grad.html
             sign = torch.sign(output_grad)
-            output.data = output.data + self.step_size * sign
+            output.data = output.data - self.step_size * sign
             # Clip output within epsilon bounds
             output.data = torch.clamp(output.data, input - self.epsilon, input + self.epsilon)
         
