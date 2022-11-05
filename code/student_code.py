@@ -257,7 +257,7 @@ class SimpleNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
 
-            # ADDED additional block:
+            # ADDED additional conv2 block:
             conv_op(64, 64, kernel_size=1, stride=1, padding=0),
             nn.BatchNorm2d(64), # ADDED batch norm
             nn.ReLU(inplace=True),
